@@ -1,0 +1,237 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Dragaminas - game</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  </head>
+  <style>
+    body {
+  font-family: 'Inconsolata', monospace;
+  text-align: center;
+}
+
+#board {
+  border: 1px solid #333;
+  display: inline-block;
+}
+
+.row {
+  font-size: 0px;
+}
+
+.col {
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  background-color: #eee;
+  border-right: 1px solid white;
+  border-bottom: 1px solid white;
+  vertical-align: top;
+  color: black;
+  font-size: 20px;
+  line-height: 50px;
+  transition: all 1.0s;
+}
+
+/* .col.hidden.mine {
+  background-color: red;
+} */
+
+.col.hidden {
+  background-color: #59aec7;
+  cursor: pointer;
+}
+
+.col.hidden:hover {
+  background-color: #eee;
+}
+
+.row:last-child .col {
+  border-bottom: none;
+}
+
+.row .col:last-child {
+  border-right: none;
+}
+  </style>
+
+  <body>
+    <h1>MINESWEEPER</h1>
+    <div id="board"></div>
+    <script>
+      var usernameGameBoardId = "{{ username_game_board_id }}";
+      var urlGetUsernameGameBoard = "/dragamina/username-game-board/"+usernameGameBoardId+"/";
+      $(document).ready(function() {
+          $.ajax({
+                url: urlGetUsernameGameBoard,
+                method: "GET",
+                data: {
+                    "username_game_board_id": usernameGameBoardId
+                },
+                {#headers:{"X-CSRFToken": $crf_token},#}
+                success: function (data) {
+                    console.log(data);
+                    ROWS = data.game_board.rows;
+                    COLS = data.game_board.columns;
+                    elements = data.game_board.elements;
+                    array = [];
+                    for (let i = 0; i < ROWS; i++) {
+                      array[i] = [];
+                      for (let j = 0; j < COLS; j++) {
+                        array[i][j] = 0;
+                      }
+                    }
+                    for (let i = 0; i < elements.length; i++) {
+                        row = elements[i].row;
+                        column = elements[i].column;
+                        type = elements[i].type_element;
+                        console.log("array["+row+"]["+column+"]="+type);
+                        array[row][column] = type;
+                    }
+                    console.log(array);
+                    restart();
+                    },
+                error: function (response) {
+                    if(response.responseJSON.detail) {
+                        alert(response.responseJSON.detail);
+                    }else{
+                        alert(response.responseJSON[0]);
+                    }
+                }
+            });
+      const $board = $("#board");
+      function getDimensionArray(array) {
+          var rows = array.length;
+          var columns = array[0].length;
+          return [rows, columns];
+      }
+      function createBoard(array) {
+        var rows = array.length;
+        var cols = array[0].length;
+        $board.empty();
+        for (let i = 0; i < rows; i++) {
+          const $row = $('<div>').addClass('row');
+          for (let j = 0; j < cols; j++) {
+            const $col = $('<div>')
+              .addClass('col hidden')
+              .attr('data-row', i)
+              .attr('data-col', j);
+            if (array[i][j] === 2) {
+              $col.addClass('mine');
+            }
+            $row.append($col);
+          }
+          $board.append($row);
+        }
+      }
+
+      function restart() {
+        createBoard(array);
+      }
+
+      function gameOver(isWin) {
+        let message = null;
+        let icon = null;
+        if (isWin) {
+          message = 'YOU WON!';
+          icon = 'fa fa-flag';
+        } else {
+          message = 'YOU LOST!';
+          icon = 'fa fa-bomb';
+        }
+        $('.col.mine').append(
+          $('<i>').addClass(icon)
+        );
+        $('.col:not(.mine)')
+          .html(function() {
+            const $cell = $(this);
+            const count = getMineCount(
+              $cell.data('row'),
+              $cell.data('col'),
+            );
+            return count === 0 ? '' : count;
+          })
+        $('.col.hidden').removeClass('hidden');
+        setTimeout(function() {
+          alert(message);
+          restart();
+        }, 1000);
+      }
+
+      function reveal(oi, oj) {
+        const seen = {};
+
+        function helper(i, j) {
+          if (i >= ROWS || j >= COLS || i < 0 || j < 0) return;
+          const key = `${i} ${j}`
+          if (seen[key]) return;
+          const $cell =
+            $(`.col.hidden[data-row=${i}][data-col=${j}]`);
+          const mineCount = getMineCount(i, j);
+          if (
+            !$cell.hasClass('hidden') ||
+            $cell.hasClass('mine')
+          ) {
+            return;
+          }
+
+          $cell.removeClass('hidden');
+
+          if (mineCount) {
+            $cell.text(mineCount);
+            return;
+          }
+
+          for (let di = -1; di <= 1; di++) {
+            for (let dj = -1; dj <= 1; dj++) {
+              helper(i + di, j + dj);
+            }
+          }
+        }
+
+        helper(oi, oj);
+      }
+
+      function getMineCount(i, j) {
+        let count = 0;
+        for (let di = -1; di <= 1; di++) {
+          for (let dj = -1; dj <= 1; dj++) {
+            const ni = i + di;
+            const nj = j + dj;
+            if (ni >= ROWS || nj >= COLS || nj < 0 || ni < 0) continue;
+            const $cell =
+              $(`.col.hidden[data-row=${ni}][data-col=${nj}]`);
+            if ($cell.hasClass('mine')) count++;
+          }
+        }
+        return count;
+      }
+
+      $board.on('click', '.col.hidden', function() {
+        const $cell = $(this);
+        const row = $cell.data('row');
+        const col = $cell.data('col');
+
+        if ($cell.hasClass('mine')) {
+          gameOver(false);
+        } else {
+          reveal(row, col);
+          const isGameOver = $('.col.hidden').length === $('.col.mine').length
+          if (isGameOver) gameOver(true);
+        }
+      })
+
+      });
+    </script>
+  </body>
+</html>

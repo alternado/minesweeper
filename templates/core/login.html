@@ -58,21 +58,21 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
 
     <script>
-        var urlCretaeUsername = "core/username/";
+        var urlCreateUsername = "core/username/";
         var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
 
         $("#button_start").on("click", function(e) {
             {#TODO: validate input is not empty#}
             e.preventDefault();
             $.ajax({
-                url: urlCretaeUsername,
+                url: urlCreateUsername,
                 method: "POST",
                 data: {
                     "username": $("#username").val()
                 },
                 headers:{"X-CSRFToken": $crf_token},
                 success: function (data) {
-                    alert(data.username)
+                    alert("Welcome " + data.username)
                     location.href = "choice-game/"+ data.username+ "/";
                     },
                 error: function (response) {
