@@ -43,10 +43,6 @@
   transition: all 1.0s;
 }
 
-/* .col.hidden.mine {
-  background-color: red;
-} */
-
 .col.hidden {
   background-color: #59aec7;
   cursor: pointer;
@@ -65,7 +61,7 @@
 }
   </style>
 
-  <body>
+  <body oncontextmenu="return false;">
     <h1>MINESWEEPER</h1>
     <h5>Instruccions:</h5>
     <h6>- Clic to select cell</h6>
@@ -74,7 +70,7 @@
     {% csrf_token %}
     <div id="board"></div>
     <script>
-      var usernameGameBoardId = "{{ username_game_board_id }}";
+      var gameBoardId = "{{ game_board_id }}";
       var pending = "{{ RESULT_BOARD_PENDING }}";
       var win = "{{ RESULT_BOARD_WIN }}";
       var lost = "{{ RESULT_BOARD_LOST }}";
@@ -84,32 +80,29 @@
       var mineFlag = "{{ TYPE_ELEMENT_MINE_FLAG }}";
       var emptyClic = "{{ TYPE_ELEMENT_EMPTY_CLIC }}";
       var result = pending;
-      var urlGetUsernameGameBoard = "/dragamina/username-game-board/"+usernameGameBoardId+"/";
+      var urlGetGameBoard = "/dragamina/game-board/"+gameBoardId+"/";
       var urlSetElementGameBoard = "/dragamina/element-game-board/";
       var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
       $(document).ready(function() {
           $.ajax({
-            url: urlGetUsernameGameBoard,
+            url: urlGetGameBoard,
             method: "GET",
-            data: {
-                "username_game_board_id": usernameGameBoardId
-            },
+            data: {},
             success: function (data) {
-                if (data.game_board.result === lost){
+                if (data.result === lost){
                     $("#board").css("pointer-events","none");
                     $("#result").text("Result: You lost this game.")
                     result = lost;
                 }
-                if (data.game_board.result === win){
+                if (data.result === win){
                     $("#board").css("pointer-events","none");
                     $("#result").text("Result: You won this game.")
                     result = win;
                 }
-                console.log(data);
-                ROWS = data.game_board.rows;
-                COLS = data.game_board.columns;
-                elements = data.game_board.elements;
-                gameBoardId = data.game_board.id;
+                ROWS = data.rows;
+                COLS = data.columns;
+                elements = data.elements;
+                gameBoardId = data.id;
                 array = [];
                 for (let i = 0; i < ROWS; i++) {
                   array[i] = [];
@@ -122,10 +115,8 @@
                     column = elements[i].column;
                     type = elements[i].type_element;
                     id = elements[i].id;
-                    console.log("array["+row+"]["+column+"]="+type);
                     array[row][column] = [id, type];
                 }
-                console.log(array);
 
                 restart();
                 },
@@ -185,9 +176,7 @@
                 $cell.click();
             }
             if (result === lost){
-                console.log("#############")
               if (array[i][j][1] === mineClic){
-                console.log(array[i][j][1] === mineClic)
                   $cell = $(`.col[data-row=${i}][data-col=${j}]`);
                   $cell.click();
                   {#gameOver(false);#}
@@ -315,7 +304,6 @@
            data: {},
             headers:{"X-CSRFToken": $crf_token},
            success: function (data) {
-               console.log(data);
                },
            error: function (response) {
                if(response.responseJSON.detail) {

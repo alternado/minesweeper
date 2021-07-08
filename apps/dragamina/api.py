@@ -36,6 +36,23 @@ class GameBoardApiView(viewsets.ModelViewSet):
         serializer = GameBoardSerializer(self.get_object(), many=False)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'], name='Get list game boards by username')
+    def get_list_game_board_by_username(self, request):
+        """
+        Get list game boards by username.
+
+        ---
+        parameters:
+        - username
+        """
+        data = request.query_params
+        username = data.get('username')
+        boar_ids = UsernameGameBoard.objects.filter(
+            username__username=username).values_list('game_board__id', flat=True)
+        games = GameBoard.objects.filter(pk__in=boar_ids).order_by('-creation_date')
+        serializer = GameBoardSerializer(games, many=True)
+        return Response(serializer.data)
+
     @action(detail=False, methods=['post'], name='Create game board')
     def create_board(self, request):
         """
@@ -53,11 +70,10 @@ class GameBoardApiView(viewsets.ModelViewSet):
           required: true
           type: int
         """
-        rows = 10
-        columns = 10
-        quantity_mines = 10
         data = request.data
-        # TODO: set unique true username
+        rows = int(data.get('rows'))
+        columns = int(data.get('columns'))
+        quantity_mines = int(data.get('mines'))
         username = Username.objects.filter(username=data.get('username')).first()
         # TODO: verify username exists
         # TODO: swagger configuration username input
@@ -77,7 +93,7 @@ class GameBoardApiView(viewsets.ModelViewSet):
         username_game_board = UsernameGameBoard.objects.create(
             username=username, game_board=game_board
         )
-        serializer = UsernameGameBoardSerializer(username_game_board, many=False)
+        serializer = UsernameGameBoardSerializer(game_board, many=False)
         return Response(serializer.data)
 
 

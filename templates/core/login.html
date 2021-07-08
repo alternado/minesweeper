@@ -54,35 +54,36 @@
     {% endif %}
     <!--================ End Registration Area =================-->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" crossorigin="anonymous"></script>#}
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
 
     <script>
-        var urlCreateUsername = "core/username/";
+        var urlCreateUsername = "core/username/get_or_create/";
         var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
 
         $("#button_start").on("click", function(e) {
             {#TODO: validate input is not empty#}
             e.preventDefault();
-            $.ajax({
-                url: urlCreateUsername,
-                method: "POST",
-                data: {
-                    "username": $("#username").val()
-                },
-                headers:{"X-CSRFToken": $crf_token},
-                success: function (data) {
-                    alert("Welcome " + data.username)
-                    location.href = "choice-game/"+ data.username+ "/";
-                    },
-                error: function (response) {
-                    if(response.responseJSON.detail) {
-                        alert(response.responseJSON.detail);
-                    }else{
-                        alert(response.responseJSON[0]);
-                    }
-                }
-            });
+            if ($.trim($("#username").val()) !== ""){
+              $.ajax({
+                  url: urlCreateUsername,
+                  method: "POST",
+                  data: {
+                      "username": $("#username").val()
+                  },
+                  headers:{"X-CSRFToken": $crf_token},
+                  success: function (data) {
+                      alert("Welcome " + data.username)
+                      location.href = "choice-game/"+ data.username+ "/";
+                      },
+                  error: function (response) {
+                      if(response.responseJSON.detail) {
+                          alert(response.responseJSON.detail);
+                      }else{
+                          alert(response.responseJSON[0]);
+                      }
+                  }
+              });
+            }
         });
     </script>
   </body>

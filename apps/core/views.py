@@ -33,6 +33,7 @@ class StartGameView(TemplateView):
         context = super().get_context_data(**kwargs)
         context.update({
             'username_game_board_id': self.kwargs.get('username_game_board_id'),
+            'game_board_id': self.kwargs.get('game_board_id'),
             'TYPE_ELEMENT_MINE': constants.TYPE_ELEMENT_MINE,
             'TYPE_ELEMENT_MINE_CLIC': constants.TYPE_ELEMENT_MINE_CLIC,
             'TYPE_ELEMENT_EMPTY_CLIC': constants.TYPE_ELEMENT_EMPTY_CLIC,

@@ -25,9 +25,16 @@
                   <h1 class="mb-3">Choose your type game</h1>
                   <form action="">
                     {% csrf_token %}
+                    <select name="select" id="type_game">
+                      <option value="type_5" >Basic 5 x 5 (5 mines)</option>
+                      <option value="type_10">Intermediate 10 x 10 (10 mines)</option>
+                      <option value="type_20">Advanced 20 x 20 (20 mines)</option>
+                    </select>
                     <button id="new_game" type="button">New game</button>
 
                   </form>
+                  <div id="list">
+                  </div>
                 </div>
               </div>
             </div>
@@ -37,25 +44,76 @@
       </div>
     <!--================ End Registration Area =================-->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" crossorigin="anonymous"></script>#}
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
 
     <script>
         var username = "{{ username }}";
         var urlCreateGameBoard = "/dragamina/game-board/create_board/";
         var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
+        var urlListGameBoard = "/dragamina/game-board/get_list_game_board_by_username/" ;
 
+      $(document).ready(function() {
+        $.ajax({
+            url: urlListGameBoard,
+            method: "GET",
+            data: {
+                "username": username
+            },
+            headers:{"X-CSRFToken": $crf_token},
+            success: function (data) {
+                $("#list").html("");
+                $.each(data, function (index, element) {
+                    var result = "Pending";
+                    var style = "";
+                    if (element.result === '2'){
+                        result = "Won";
+                        style = "color: green;";
+                    }
+                    if (element.result === '3'){
+                        result = "Lost";
+                        style = "color: red;";
+                    }
+                  $("#list").append("" +
+                    "<div>"+
+                      "<span style='"+style+"'>- start date: "+element.creation_date +" , result : "+result+"</span> <a href='/start-game/"+ element.id +"/'>Go-></a>"+
+                    "</div>")
+                }); 
+            },
+            error: function (response) {
+                if (response.responseJSON.detail) {
+                    alert(response.responseJSON.detail);
+                } else {
+                    alert(response.responseJSON[0]);
+                }
+            }
+        });
+      });
         $("#new_game").on("click", function(e) {
             e.preventDefault();
+            var rows = 5;
+            var cols = 5;
+            var mines = 5;
+            if ($("#type_game").val() === "type_10"){
+              rows = 10;
+              cols = 10;
+              mines = 10;
+            }
+            if ($("#type_game").val() === "type_20"){
+              rows = 20;
+              cols = 20;
+              mines = 20;
+            }
             $.ajax({
                 url: urlCreateGameBoard,
                 method: "POST",
                 data: {
-                    "username": username
+                    "username": username,
+                    "rows": rows,
+                    "columns": cols,
+                    "mines": mines
                 },
                 headers:{"X-CSRFToken": $crf_token},
                 success: function (data) {
-                    console.log(data);
                     alert("Created game.")
                     location.href = "/start-game/"+ data.id +"/";
                     },
@@ -67,6 +125,14 @@
                     }
                 }
             });
+        });
+        window.addEventListener( "pageshow", function ( event ) {
+          var historyTraversal = event.persisted ||
+                                 ( typeof window.performance != "undefined" &&
+                                      window.performance.navigation.type === 2 );
+          if ( historyTraversal ) {
+            window.location.reload();
+          }
         });
     </script>
   </body>

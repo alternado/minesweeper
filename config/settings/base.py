@@ -78,7 +78,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+LANGUAGE_CODE = 'en'
+TIME_ZONE = 'America/Lima'
+USE_I18N = True
+USE_L10N = True
+USE_TZ = False
 
+REST_FRAMEWORK = {
+    'DATETIME_FORMAT': "%Y-%m-%d %H:%M:%S",
+}
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
