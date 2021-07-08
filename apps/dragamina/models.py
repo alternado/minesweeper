@@ -8,6 +8,8 @@ from apps.core.models import Username
 class GameBoard(BaseModel):
     rows = models.PositiveSmallIntegerField()
     columns = models.PositiveSmallIntegerField()
+    result = models.CharField(max_length=3, choices=constants.RESULT_BOARD_CHOICES,
+                              default=constants.RESULT_BOARD_PENDING)
 
     def __str__(self):
         return '{}'.format(self.dimension)

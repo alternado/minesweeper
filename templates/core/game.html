@@ -67,54 +67,78 @@
 
   <body>
     <h1>MINESWEEPER</h1>
+    <h5>Instruccions:</h5>
+    <h6>- Clic to select cell</h6>
+    <h6>- Clic right to put flags</h6>
+    <p id="result"></p>
+    {% csrf_token %}
     <div id="board"></div>
     <script>
       var usernameGameBoardId = "{{ username_game_board_id }}";
+      var pending = "{{ RESULT_BOARD_PENDING }}";
+      var win = "{{ RESULT_BOARD_WIN }}";
+      var lost = "{{ RESULT_BOARD_LOST }}";
+      var mine = "{{ TYPE_ELEMENT_MINE }}";
+      var mineClic = "{{ TYPE_ELEMENT_MINE_CLIC }}";
+      var flag = "{{ TYPE_ELEMENT_FLAG }}";
+      var mineFlag = "{{ TYPE_ELEMENT_MINE_FLAG }}";
+      var emptyClic = "{{ TYPE_ELEMENT_EMPTY_CLIC }}";
+      var result = pending;
       var urlGetUsernameGameBoard = "/dragamina/username-game-board/"+usernameGameBoardId+"/";
+      var urlSetElementGameBoard = "/dragamina/element-game-board/";
+      var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
       $(document).ready(function() {
           $.ajax({
-                url: urlGetUsernameGameBoard,
-                method: "GET",
-                data: {
-                    "username_game_board_id": usernameGameBoardId
-                },
-                {#headers:{"X-CSRFToken": $crf_token},#}
-                success: function (data) {
-                    console.log(data);
-                    ROWS = data.game_board.rows;
-                    COLS = data.game_board.columns;
-                    elements = data.game_board.elements;
-                    array = [];
-                    for (let i = 0; i < ROWS; i++) {
-                      array[i] = [];
-                      for (let j = 0; j < COLS; j++) {
-                        array[i][j] = 0;
-                      }
-                    }
-                    for (let i = 0; i < elements.length; i++) {
-                        row = elements[i].row;
-                        column = elements[i].column;
-                        type = elements[i].type_element;
-                        console.log("array["+row+"]["+column+"]="+type);
-                        array[row][column] = type;
-                    }
-                    console.log(array);
-                    restart();
-                    },
-                error: function (response) {
-                    if(response.responseJSON.detail) {
-                        alert(response.responseJSON.detail);
-                    }else{
-                        alert(response.responseJSON[0]);
-                    }
+            url: urlGetUsernameGameBoard,
+            method: "GET",
+            data: {
+                "username_game_board_id": usernameGameBoardId
+            },
+            success: function (data) {
+                if (data.game_board.result === lost){
+                    $("#board").css("pointer-events","none");
+                    $("#result").text("Result: You lost this game.")
+                    result = lost;
                 }
-            });
+                if (data.game_board.result === win){
+                    $("#board").css("pointer-events","none");
+                    $("#result").text("Result: You won this game.")
+                    result = win;
+                }
+                console.log(data);
+                ROWS = data.game_board.rows;
+                COLS = data.game_board.columns;
+                elements = data.game_board.elements;
+                gameBoardId = data.game_board.id;
+                array = [];
+                for (let i = 0; i < ROWS; i++) {
+                  array[i] = [];
+                  for (let j = 0; j < COLS; j++) {
+                    array[i][j] = 0;
+                  }
+                }
+                for (let i = 0; i < elements.length; i++) {
+                    row = elements[i].row;
+                    column = elements[i].column;
+                    type = elements[i].type_element;
+                    id = elements[i].id;
+                    console.log("array["+row+"]["+column+"]="+type);
+                    array[row][column] = [id, type];
+                }
+                console.log(array);
+
+                restart();
+                },
+            error: function (response) {
+                if(response.responseJSON.detail) {
+                    alert(response.responseJSON.detail);
+                }else{
+                    alert(response.responseJSON[0]);
+                }
+            }
+        });
       const $board = $("#board");
-      function getDimensionArray(array) {
-          var rows = array.length;
-          var columns = array[0].length;
-          return [rows, columns];
-      }
+
       function createBoard(array) {
         var rows = array.length;
         var cols = array[0].length;
@@ -125,13 +149,51 @@
             const $col = $('<div>')
               .addClass('col hidden')
               .attr('data-row', i)
-              .attr('data-col', j);
-            if (array[i][j] === 2) {
+              .attr('data-col', j)
+              .attr('data-element-id', array[i][j][0]);
+            if (array[i][j][1] === mine) {
               $col.addClass('mine');
+            }
+            if (array[i][j][1] === mineClic) {
+              $col.addClass('mine');
+            }
+            if (array[i][j][1] === mineFlag) {
+              $col.addClass('mine');
+              $col.append(
+                  $('<i>').addClass('fa fa-flag')
+              );
+            }
+            if (array[i][j][1] === mineFlag) {
+              $col.append(
+                  $('<i>').addClass('fa fa-bomb')
+              );
+            }
+            if (array[i][j][1] === flag) {
+              $col.append(
+                  $('<i>').addClass('fa fa-flag')
+              );
             }
             $row.append($col);
           }
           $board.append($row);
+        }
+
+        for (let i = 0; i < rows; i++) {
+          for (let j = 0; j < cols; j++) {
+            var $cell = $(`.col.hidden[data-row=${i}][data-col=${j}]`);
+            if (array[i][j][1] === emptyClic) {
+                $cell.click();
+            }
+            if (result === lost){
+                console.log("#############")
+              if (array[i][j][1] === mineClic){
+                console.log(array[i][j][1] === mineClic)
+                  $cell = $(`.col[data-row=${i}][data-col=${j}]`);
+                  $cell.click();
+                  {#gameOver(false);#}
+              }
+            }
+          }
         }
       }
 
@@ -164,7 +226,7 @@
         $('.col.hidden').removeClass('hidden');
         setTimeout(function() {
           alert(message);
-          restart();
+          {#restart();#}
         }, 1000);
       }
 
@@ -186,7 +248,7 @@
           }
 
           $cell.removeClass('hidden');
-
+          $cell.find("i:first").removeClass('fa fa-flag');
           if (mineCount) {
             $cell.text(mineCount);
             return;
@@ -216,18 +278,77 @@
         }
         return count;
       }
-
-      $board.on('click', '.col.hidden', function() {
+      $(document).on("contextmenu", ".col.hidden", function(e){
         const $cell = $(this);
-        const row = $cell.data('row');
-        const col = $cell.data('col');
-
+        const id = $cell.data("element-id");
+        urlClicElementGameBoard = "/dragamina/element-game-board/" + id + "/clic_element/";
+        $.ajax({
+           url: urlClicElementGameBoard,
+           method: "POST",
+           data: {
+               "flag": true
+           },
+            headers:{"X-CSRFToken": $crf_token},
+           success: function (data) {
+               $cell.append(
+                   $('<i>').addClass('fa fa-flag')
+               );
+               },
+           error: function (response) {
+               if(response.responseJSON.detail) {
+                   alert(response.responseJSON.detail);
+               }else{
+                   alert(response.responseJSON[0]);
+               }
+           }
+         });
+      });
+      $board.on("click", ".col.hidden", function() {
+        const $cell = $(this);
+        const row = $cell.data("row");
+        const col = $cell.data("col");
+        const id = $cell.data("element-id");
+        urlClicElementGameBoard = "/dragamina/element-game-board/" + id + "/clic_element/";
+        $.ajax({
+           url: urlClicElementGameBoard,
+           method: "POST",
+           data: {},
+            headers:{"X-CSRFToken": $crf_token},
+           success: function (data) {
+               console.log(data);
+               },
+           error: function (response) {
+               if(response.responseJSON.detail) {
+                   alert(response.responseJSON.detail);
+               }else{
+                   alert(response.responseJSON[0]);
+               }
+           }
+         });
         if ($cell.hasClass('mine')) {
           gameOver(false);
         } else {
           reveal(row, col);
           const isGameOver = $('.col.hidden').length === $('.col.mine').length
-          if (isGameOver) gameOver(true);
+          if (isGameOver){
+            urlWinGameBoard = "/dragamina/game-board/" + gameBoardId + "/set_win_game/";
+            gameOver(true);
+            $.ajax({
+                url: urlWinGameBoard,
+                method: "POST",
+                data: {},
+                headers:{"X-CSRFToken": $crf_token},
+                success: function (data) {
+                },
+               error: function (response) {
+                   if(response.responseJSON.detail) {
+                       alert(response.responseJSON.detail);
+                   }else{
+                       alert(response.responseJSON[0]);
+                   }
+               }
+             });
+          }
         }
       })
 

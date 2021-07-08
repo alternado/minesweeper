@@ -1,5 +1,7 @@
 from django.views.generic import TemplateView
 
+from apps.common import constants
+
 
 class IndexView(TemplateView):
     template_name = 'core/login.html'
@@ -31,5 +33,13 @@ class StartGameView(TemplateView):
         context = super().get_context_data(**kwargs)
         context.update({
             'username_game_board_id': self.kwargs.get('username_game_board_id'),
+            'TYPE_ELEMENT_MINE': constants.TYPE_ELEMENT_MINE,
+            'TYPE_ELEMENT_MINE_CLIC': constants.TYPE_ELEMENT_MINE_CLIC,
+            'TYPE_ELEMENT_EMPTY_CLIC': constants.TYPE_ELEMENT_EMPTY_CLIC,
+            'TYPE_ELEMENT_FLAG': constants.TYPE_ELEMENT_FLAG,
+            'TYPE_ELEMENT_MINE_FLAG': constants.TYPE_ELEMENT_MINE_FLAG,
+            'RESULT_BOARD_PENDING': constants.RESULT_BOARD_PENDING,
+            'RESULT_BOARD_WIN': constants.RESULT_BOARD_WIN,
+            'RESULT_BOARD_LOST': constants.RESULT_BOARD_LOST,
         })
         return context
