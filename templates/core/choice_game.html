@@ -49,9 +49,9 @@
 
     <script>
         var username = "{{ username }}";
-        var urlCreateGameBoard = "/dragamina/game-board/create_board/";
+        var urlCreateGameBoard = "/dev/dragamina/game-board/create_board/";
         var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
-        var urlListGameBoard = "/dragamina/game-board/get_list_game_board_by_username/" ;
+        var urlListGameBoard = "/dev/dragamina/game-board/get_list_game_board_by_username/" ;
 
       $(document).ready(function() {
         $.ajax({
@@ -76,7 +76,7 @@
                     }
                   $("#list").append("" +
                     "<div>"+
-                      "<span style='"+style+"'>- start date: "+element.creation_date +" , result : "+result+"</span> <a href='/start-game/"+ element.id +"/'>Go-></a>"+
+                      "<span style='"+style+"'>- start date: "+element.creation_date +" , result : "+result+"</span> <a href='/dev/start-game/"+ element.id +"/'>Go-></a>"+
                     "</div>")
                 }); 
             },
@@ -118,7 +118,7 @@
                 success: function (data) {
                     $.unblockUI();
                     alert("Created game.")
-                    location.href = "/start-game/"+ data.id +"/";
+                    location.href = "/dev/start-game/"+ data.id +"/";
                     },
                 error: function (response) {
                     $.unblockUI();

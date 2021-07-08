@@ -57,7 +57,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
 
     <script>
-        var urlCreateUsername = "core/username/get_or_create/";
+        var urlCreateUsername = "/dev/core/username/get_or_create/";
         var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
 
         $("#button_start").on("click", function(e) {
@@ -73,7 +73,7 @@
                   headers:{"X-CSRFToken": $crf_token},
                   success: function (data) {
                       alert("Welcome " + data.username)
-                      location.href = "choice-game/"+ data.username+ "/";
+                      location.href = "/dev/choice-game/"+ data.username+ "/";
                       },
                   error: function (response) {
                       if(response.responseJSON.detail) {

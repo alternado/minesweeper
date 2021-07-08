@@ -80,8 +80,8 @@
       var mineFlag = "{{ TYPE_ELEMENT_MINE_FLAG }}";
       var emptyClic = "{{ TYPE_ELEMENT_EMPTY_CLIC }}";
       var result = pending;
-      var urlGetGameBoard = "/dragamina/game-board/"+gameBoardId+"/";
-      var urlSetElementGameBoard = "/dragamina/element-game-board/";
+      var urlGetGameBoard = "/dev/dragamina/game-board/"+gameBoardId+"/";
+      var urlSetElementGameBoard = "/dev/dragamina/element-game-board/";
       var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
       $(document).ready(function() {
           $.ajax({
@@ -270,7 +270,7 @@
       $(document).on("contextmenu", ".col.hidden", function(e){
         const $cell = $(this);
         const id = $cell.data("element-id");
-        urlClicElementGameBoard = "/dragamina/element-game-board/" + id + "/clic_element/";
+        urlClicElementGameBoard = "/dev/dragamina/element-game-board/" + id + "/clic_element/";
         $.ajax({
            url: urlClicElementGameBoard,
            method: "POST",
@@ -297,7 +297,7 @@
         const row = $cell.data("row");
         const col = $cell.data("col");
         const id = $cell.data("element-id");
-        urlClicElementGameBoard = "/dragamina/element-game-board/" + id + "/clic_element/";
+        urlClicElementGameBoard = "/dev/dragamina/element-game-board/" + id + "/clic_element/";
         $.ajax({
            url: urlClicElementGameBoard,
            method: "POST",
@@ -319,7 +319,7 @@
           reveal(row, col);
           const isGameOver = $('.col.hidden').length === $('.col.mine').length
           if (isGameOver){
-            urlWinGameBoard = "/dragamina/game-board/" + gameBoardId + "/set_win_game/";
+            urlWinGameBoard = "/dev/dragamina/game-board/" + gameBoardId + "/set_win_game/";
             gameOver(true);
             $.ajax({
                 url: urlWinGameBoard,

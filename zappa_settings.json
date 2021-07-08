@@ -1,0 +1,17 @@
+{
+    "dev": {
+        "aws_region": "us-east-1",
+        "django_settings": "config.settings.base",
+        "profile_name": "default",
+        "project_name": "minesweeper",
+        "runtime": "python3.6",
+        "s3_bucket": "prj-minesweeper",
+        "lambda_description": "Zappa dev",
+        "memory_size": 1024,
+        "timeout_seconds": 900,
+        "use_precompiled_packages": false,
+        "environment_variables": {
+            "DJANGO_SETTINGS_MODULE": "config.settings.base"
+        }
+    }
+}
