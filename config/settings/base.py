@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 SECRET_KEY = 'cg&qket4r(8a^mrj-7i$w8%89s2tw0a@@w7u$gfecp=3d1nk$-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'zappa_django_utils',
     'corsheaders',
-    'django_s3_sqlite'
+    'django_s3_sqlite',
+    'django_s3_storage'
 ]
 
 MIDDLEWARE = [
@@ -93,7 +94,7 @@ REST_FRAMEWORK = {
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, '../../db.sqlite3'),
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
 #     }
 # }
 DATABASES = {
@@ -140,5 +141,17 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_URL = '/static/'
+# STATIC_URL = '/static/'
+
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR,  'apps', 'static'),
+#     os.path.join(BASE_DIR, 'static'),
+# ]
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+YOUR_S3_BUCKET = "db-minesweeper-bucket"
+STATICFILES_STORAGE = "django_s3_storage.storage.StaticS3Storage"
+AWS_S3_BUCKET_NAME_STATIC = YOUR_S3_BUCKET
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % YOUR_S3_BUCKET
+STATIC_URL = "https://%s/" % AWS_S3_CUSTOM_DOMAIN
