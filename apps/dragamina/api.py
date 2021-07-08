@@ -135,12 +135,13 @@ class ElementGameBoardApiView(viewsets.ModelViewSet):
             element.type_element = constants.TYPE_ELEMENT_EMPTY_CLIC
             if flag:
                 element.type_element = constants.TYPE_ELEMENT_FLAG
-        if element.type_element == constants.TYPE_ELEMENT_MINE:
-            element.type_element = constants.TYPE_ELEMENT_MINE_CLIC
+        if element.type_element in (constants.TYPE_ELEMENT_MINE, constants.TYPE_ELEMENT_MINE_FLAG):
             if flag:
                 element.type_element = constants.TYPE_ELEMENT_MINE_FLAG
-            element.game_board.result = constants.RESULT_BOARD_LOST
-            element.game_board.save()
+            else:
+                element.type_element = constants.TYPE_ELEMENT_MINE_CLIC
+                element.game_board.result = constants.RESULT_BOARD_LOST
+                element.game_board.save()
         element.save()
 
         serializer = ElementGameBoardSerializer(self.get_object(), many=False)

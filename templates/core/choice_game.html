@@ -26,9 +26,9 @@
                   <form action="">
                     {% csrf_token %}
                     <select name="select" id="type_game">
-                      <option value="type_5" >Basic 5 x 5 (5 mines)</option>
-                      <option value="type_10">Intermediate 10 x 10 (10 mines)</option>
-                      <option value="type_20">Advanced 20 x 20 (20 mines)</option>
+                      <option value="type_5" >5 x 5 (5 mines)</option>
+                      <option value="type_10">10 x 10 (10 mines)</option>
+                      <option value="type_20">20 x 20 (20 mines)</option>
                     </select>
                     <button id="new_game" type="button">New game</button>
 
@@ -45,6 +45,7 @@
     <!--================ End Registration Area =================-->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
 
     <script>
         var username = "{{ username }}";
@@ -89,6 +90,7 @@
         });
       });
         $("#new_game").on("click", function(e) {
+            $.blockUI({message: "<h1>Creating game...</h1>"});
             e.preventDefault();
             var rows = 5;
             var cols = 5;
@@ -114,10 +116,12 @@
                 },
                 headers:{"X-CSRFToken": $crf_token},
                 success: function (data) {
+                    $.unblockUI();
                     alert("Created game.")
                     location.href = "/start-game/"+ data.id +"/";
                     },
                 error: function (response) {
+                    $.unblockUI();
                     if(response.responseJSON.detail) {
                         alert(response.responseJSON.detail);
                     }else{
